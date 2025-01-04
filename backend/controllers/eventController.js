@@ -1,4 +1,5 @@
 const events = []; // Array to store events
+const fs = require('fs');
 const Queues=require('../utils/Queues');
 const PriorityTree = require('../utils/PriorityTree');
 
@@ -7,12 +8,25 @@ exports.createEvent = (req, res) => {
   if (events.find((e) => e.name === eventName)) {
     return res.status(400).json({ error: 'Event already exists' });
   }
-  events.push({
+
+  const newEvent = {
     name: eventName,
     attendees: [],
     queue: new Queues(),
     priorityTree: new PriorityTree(),
+  };
+
+  events.push(newEvent);
+
+ 
+  const eventDetails = `Event Name: ${eventName}\n`;
+  fs.appendFile('event.txt', eventDetails, (err) => {
+    if (err) {
+      console.error('Error writing to event.txt:', err);
+      return res.status(500).json({ error: 'Error creating event file' });
+    }
   });
+
   res.status(201).json({ message: 'Event created', event: { name: eventName, attendees: [] } });
 };
 
